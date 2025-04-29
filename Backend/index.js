@@ -1,35 +1,39 @@
-import express, { urlencoded } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
+import userRoutes from "./Routes/user.routes.js";
 
-dotenv.config({});
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// middlewares
+// Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-const corsOptions = {
-    origin: 'http://localhost:5173', // Corrected spelling
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend origin
     credentials: true,
-};
-app.use(cors(corsOptions));
+  })
+);
 
-// routes
+// Routes
 app.get("/", (req, res) => {
-    return res.status(200).json({
-        message: "I am coming from backend",
-        success: true,
-    });
+  res.status(200).json({
+    message: "I am coming from backend",
+    success: true,
+  });
 });
 
+app.use("/api/v1/user", userRoutes);
 
+// Start server
+connectDB();
 app.listen(PORT, () => {
-    connectDB()
-    console.log(`Server listening at port ${PORT}`);
+  console.log(`Server listening at port ${PORT}`);
 });
