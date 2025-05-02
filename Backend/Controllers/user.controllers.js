@@ -9,18 +9,24 @@ export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(401).json({ message: "All fields are required", success: false });
+      return res
+        .status(401)
+        .json({ message: "All fields are required", success: false });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(401).json({ message: "User already exists", success: false });
+      return res
+        .status(401)
+        .json({ message: "User already exists", success: false });
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
     await User.create({ username, email, password: hashPassword });
 
-    return res.status(201).json({ message: "User created successfully", success: true });
+    return res
+      .status(201)
+      .json({ message: "User created successfully", success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error", success: false });
@@ -32,20 +38,39 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(401).json({ message: "All fields are required", success: false });
+      return res
+        .status(401)
+        .json({ message: "All fields are required", success: false });
     }
 
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials", success: false });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials", success: false });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(401).json({ message: "Invalid credentials", success: false });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials", success: false });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1d",
+    });
+
+    const populatedPosts = await Promise.all(
+      user.posts.map(async (postId) => {
+        const post = await User.findById(postId);
+        if (post.author.equals(user._id)) {
+          return post;
+        } else {
+          return null;
+        }
+      })
+    );
 
     return res
       .cookie("token", token, {
@@ -64,7 +89,7 @@ export const login = async (req, res) => {
           bio: user.bio,
           followers: user.followers,
           following: user.following,
-          posts: user.posts,
+          posts: populatedPosts,
         },
       });
   } catch (error) {
@@ -76,7 +101,9 @@ export const login = async (req, res) => {
 // Logout
 export const logout = async (_, res) => {
   try {
-    return res.cookie("token", "", { maxAge: 0 }).json({ message: "Logged out", success: true });
+    return res
+      .cookie("token", "", { maxAge: 0 })
+      .json({ message: "Logged out", success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error", success: false });
@@ -89,7 +116,9 @@ export const getProfile = async (req, res) => {
     const userId = req.params.id;
     const user = await User.findById(userId).select("-password");
     if (!user) {
-      return res.status(404).json({ message: "User not found", success: false });
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
     }
     return res.status(200).json({ user, success: true });
   } catch (error) {
@@ -107,7 +136,9 @@ export const editProfile = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found", success: false });
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
     }
 
     if (profilePicture) {
@@ -135,9 +166,13 @@ export const editProfile = async (req, res) => {
 // Suggested Users
 export const getSuggestedUsers = async (req, res) => {
   try {
-    const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select("-password");
+    const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
+      "-password"
+    );
     if (!suggestedUsers.length) {
-      return res.status(400).json({ message: "No users found", success: false });
+      return res
+        .status(400)
+        .json({ message: "No users found", success: false });
     }
     return res.status(200).json({ success: true, suggestedUsers });
   } catch (error) {
@@ -153,28 +188,44 @@ export const followOrUnfollow = async (req, res) => {
     const usfollowing = req.params.id;
 
     if (whoFollowed === usfollowing) {
-      return res.status(400).json({ message: "You cannot follow yourself", success: false });
+      return res
+        .status(400)
+        .json({ message: "You cannot follow yourself", success: false });
     }
 
     const user = await User.findById(whoFollowed);
     const targetUser = await User.findById(usfollowing);
 
     if (!user || !targetUser) {
-      return res.status(400).json({ message: "User not found", success: false });
+      return res
+        .status(400)
+        .json({ message: "User not found", success: false });
     }
 
     const isFollowing = user.following.includes(usfollowing);
 
     if (isFollowing) {
       await Promise.all([
-        User.updateOne({ _id: whoFollowed }, { $pull: { following: usfollowing } }),
-        User.updateOne({ _id: usfollowing }, { $pull: { followers: whoFollowed } }),
+        User.updateOne(
+          { _id: whoFollowed },
+          { $pull: { following: usfollowing } }
+        ),
+        User.updateOne(
+          { _id: usfollowing },
+          { $pull: { followers: whoFollowed } }
+        ),
       ]);
       return res.status(200).json({ message: "Unfollowed", success: true });
     } else {
       await Promise.all([
-        User.updateOne({ _id: whoFollowed }, { $push: { following: usfollowing } }),
-        User.updateOne({ _id: usfollowing }, { $push: { followers: whoFollowed } }),
+        User.updateOne(
+          { _id: whoFollowed },
+          { $push: { following: usfollowing } }
+        ),
+        User.updateOne(
+          { _id: usfollowing },
+          { $push: { followers: whoFollowed } }
+        ),
       ]);
       return res.status(200).json({ message: "Followed", success: true });
     }
