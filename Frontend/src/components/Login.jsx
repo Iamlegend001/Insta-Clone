@@ -12,16 +12,15 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react"; // Add loader icon
+import { Loader2 } from "lucide-react"; // Loader icon
 
-const SignUp = () => {
+const Login = () => {
   const [input, setInput] = useState({
-    username: "",
     email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -32,7 +31,7 @@ const SignUp = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:8000/api/v1/users/register",
+        "http://localhost:8000/api/v1/users/login",
         input,
         {
           headers: {
@@ -42,16 +41,12 @@ const SignUp = () => {
         }
       );
       if (res.data.success) {
-        navigate("/login")
+        navigate("/");
         toast.success(res.data.message);
-        setInput({
-          username: "",
-          email: "",
-          password: "",
-        });
+        setInput({ email: "", password: "" });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Signup failed");
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -64,24 +59,10 @@ const SignUp = () => {
           <CardHeader className="text-center mb-4">
             <CardTitle className="text-2xl font-bold">LOGO</CardTitle>
             <CardDescription>
-              Signup to see photos and videos of your friends.
+              Login to see photos and videos of your friends.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-5">
-            {/* Username */}
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                name="username"
-                value={input.username}
-                onChange={changeEventHandler}
-                placeholder="Enter your username"
-                className="mt-2"
-              />
-            </div>
-
             {/* Email */}
             <div>
               <Label htmlFor="email">Email</Label>
@@ -118,17 +99,17 @@ const SignUp = () => {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing up...
+                  Please wait...
                 </>
               ) : (
-                "Sign Up"
+                "Login"
               )}
             </Button>
 
             <div className="text-center text-sm mt-2 text-gray-600">
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-600 hover:underline">
-                Login
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-blue-600 hover:underline">
+                Signup
               </Link>
             </div>
           </CardContent>
@@ -138,4 +119,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Login;

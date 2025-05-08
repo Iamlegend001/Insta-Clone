@@ -35,7 +35,8 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/users", userRoutes);
+
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/message", messageRoutes);
 
