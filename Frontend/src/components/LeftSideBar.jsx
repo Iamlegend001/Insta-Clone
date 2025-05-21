@@ -1,4 +1,6 @@
 import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   Home,
   Search,
@@ -6,64 +8,59 @@ import {
   Send,
   Heart,
   PlusSquare,
-  User,
   Menu,
-  LogOut,
 } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-
+// Sidebar icon array with label and optional profile flag
 const sidebarItems = [
-  { icon: Home, text: "Home" },
-  { icon: Search, text: "Explore" },
-  { icon: PlayCircle, text: "Reels" },
-  { icon: Send, text: "Messages" },
-  { icon: Heart, text: "Notifications" },
-  { icon: PlusSquare, text: "Create" },
-  { icon: User, text: "Profile" },
-  { icon: Menu, text: "More" },
+  { icon: Home, label: "Home" },
+  { icon: Search, label: "Explore" },
+  { icon: PlayCircle, label: "Reels" },
+  { icon: Send, label: "Messages" },
+  { icon: Heart, label: "Notifications" },
+  { icon: PlusSquare, label: "Create" },
+  { icon: Avatar, label: "Profile", isProfile: true },
+  { icon: Menu, label: "More" },
 ];
 
 const LeftSideBar = () => {
   return (
-    <aside className="relative w-64 p-4 flex flex-col gap-6">
-      {/* Navigation Items */}
-      <div className="flex flex-col gap-6">
+    <div className="w-64 min-h-screen border-r bg-white flex flex-col justify-between py-6 px-4">
+      {/* Instagram Logo */}
+      <div className="mb-8">
+        <img
+          src="/Picture/logo.png"
+          alt="Instagram"
+          className="h-10"
+        />
+      </div>
+
+      {/* Sidebar Items */}
+      <div className="flex flex-col gap-4">
         {sidebarItems.map((item, index) => (
           <div
             key={index}
             className="flex items-center gap-4 cursor-pointer hover:bg-gray-100 rounded-xl p-2 transition-all"
           >
-            <item.icon className="w-6 h-6" />
-            <span className="text-base font-medium">{item.text}</span>
+            {item.isProfile ? (
+              <Avatar className="w-6 h-6">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+            ) : (
+              <item.icon className="w-6 h-6" />
+            )}
+            <span className="text-sm font-semibold">{item.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Bottom Section */}
-      <div className="flex flex-col gap-4 mt-6">
-        <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-100 rounded-xl p-2 transition-all">
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-          <span className="text-base font-medium">Profile</span>
-        </div>
-
-        <hr className="border-t border-gray-200" />
-
-        <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-100 rounded-xl p-2 transition-all">
-          <LogOut className="w-6 h-6" />
-          <span className="text-base font-medium">Logout</span>
-        </div>
+      {/* Optional Footer */}
+      <div className="text-xs text-gray-500 text-center mt-8">
+        © 2025 Instagram Clone
       </div>
-    </aside>
+    </div>
   );
 };
 
 export default LeftSideBar;
- 
